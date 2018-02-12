@@ -20,34 +20,29 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 	if (!WBP_MainMenu.GetDefaultObject())
 		return;
 	UMainMenu* mainMenu = CreateWidget<UMainMenu>(this, WBP_MainMenu);
-	mainMenu->AddToViewport();
 	mainMenu->SetMenuInterface(this);
-
-	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
-	{
-		FInputModeUIOnly inputMode;
-		inputMode.SetWidgetToFocus(mainMenu->TakeWidget());
-		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		firstPlayerController->SetInputMode(inputMode);
-		firstPlayerController->bShowMouseCursor = true;
-	}
+	mainMenu->Setup();
 }
 
 void UPuzzlePlatformsGameInstance::Host()
 {
+	if (LevelToHost.IsNull())
+	{
+		const FString errorMessage = "there is no level to host!";
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
+		else
+			UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
+
+		return;
+	}
 	if(GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString("Hosting"));
 	}
 	if(UWorld* const world = GetWorld())
 	{
-		world->ServerTravel("/Game/Maps/PuzzlePlatforms?listen");
-
-		if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
-		{
-			firstPlayerController->SetInputMode(FInputModeGameOnly());
-			firstPlayerController->bShowMouseCursor = false;
-		}
+		world->ServerTravel(LevelToHost.GetLongPackageName().Append("?listen"));
 	}
 }
 

@@ -8,6 +8,8 @@
 #include "PuzzlePlatformsGameInstance.generated.h"
 
 class UUserWidget;
+class UMainMenu;
+
 /**
  * 
  */
@@ -18,6 +20,9 @@ class PUZZLEPLATFORMS_API UPuzzlePlatformsGameInstance : public UGameInstance, p
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> WBP_MainMenu;
+
+	UPROPERTY(EditAnywhere)
+	TAssetPtr<UWorld> LevelToHost;
 
 public:
 	UPuzzlePlatformsGameInstance();

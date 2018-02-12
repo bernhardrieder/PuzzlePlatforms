@@ -24,8 +24,9 @@ class PUZZLEPLATFORMS_API UMainMenu : public UUserWidget
 
 public:
 	virtual bool Initialize() override;
-
+	void Setup();
 	void SetMenuInterface(IMenuInterface* menuInterface);
+
 private:
 
 	UFUNCTION()
@@ -34,5 +35,9 @@ private:
 	UFUNCTION()
 	void joinBtnClicked();
 
+protected:
+	virtual void OnLevelRemovedFromWorld(ULevel* inLevel, UWorld* inWorld) override;
+
+private:
 	IMenuInterface* m_menuInterface;
 };
