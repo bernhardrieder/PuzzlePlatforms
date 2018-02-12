@@ -24,7 +24,7 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 	mainMenu->Setup();
 }
 
-void UPuzzlePlatformsGameInstance::Host()
+void UPuzzlePlatformsGameInstance::HostServer()
 {
 	if (LevelToHost.IsNull())
 	{
@@ -46,7 +46,7 @@ void UPuzzlePlatformsGameInstance::Host()
 	}
 }
 
-void UPuzzlePlatformsGameInstance::Join(const FString& address)
+void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 {
 	if (GEngine)
 	{

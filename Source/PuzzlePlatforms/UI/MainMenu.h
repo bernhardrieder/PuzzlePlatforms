@@ -8,6 +8,8 @@
 #include "MainMenu.generated.h"
 
 class UButton;
+class UWidgetSwitcher;
+class UEditableTextBox;
 /**
  * 
  */
@@ -17,10 +19,28 @@ class PUZZLEPLATFORMS_API UMainMenu : public UUserWidget
 	GENERATED_BODY()
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* m_hostButton = nullptr;
+	UButton* m_hostServerButton = nullptr;
 	
 	UPROPERTY(meta = (BindWidget))
-	UButton* m_joinButton = nullptr;
+	UButton* m_joinMenuButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* m_joinServerButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* m_cancelJoinMenuButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UWidgetSwitcher* m_menuSwitcher = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UWidget* m_mainMenu = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UWidget* m_joinMenu = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UEditableTextBox* m_ipAddressTxtBox = nullptr;
 
 public:
 	virtual bool Initialize() override;
@@ -30,10 +50,16 @@ public:
 private:
 
 	UFUNCTION()
-	void hostBtnClicked();
+	void hostServerBtnClicked();
 
 	UFUNCTION()
-	void joinBtnClicked();
+	void joinMenuBtnClicked();
+
+	UFUNCTION()
+	void joinServerBtnClicked();
+
+	UFUNCTION()
+	void cancelJoinMenuBtnClicked();
 
 protected:
 	virtual void OnLevelRemovedFromWorld(ULevel* inLevel, UWorld* inWorld) override;

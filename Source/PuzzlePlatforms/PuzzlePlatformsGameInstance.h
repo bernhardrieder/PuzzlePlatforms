@@ -33,10 +33,8 @@ public:
 	void LoadMenu();
 
 	UFUNCTION(Exec)
-	void Host() override;
+	void HostServer() override;
 
 	UFUNCTION(Exec)
-	void Join(const FString& address);
-
-	void Join() override {}
+	void JoinServer(const FString& address) override;
 };

@@ -2,14 +2,18 @@
 
 #include "MainMenu.h"
 #include "Button.h"
+#include "WidgetSwitcher.h"
+#include "EditableTextBox.h"
 
 bool UMainMenu::Initialize()
 {
-	if (!Super::Initialize() || !m_hostButton || !m_joinButton)
+	if (!Super::Initialize() || !m_hostServerButton || !m_joinMenuButton || !m_joinServerButton || !m_cancelJoinMenuButton)
 		return false;
 
-	m_hostButton->OnClicked.AddDynamic(this, &UMainMenu::hostBtnClicked);
-	m_joinButton->OnClicked.AddDynamic(this, &UMainMenu::joinBtnClicked);
+	m_hostServerButton->OnClicked.AddDynamic(this, &UMainMenu::hostServerBtnClicked);
+	m_joinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::joinMenuBtnClicked);
+	m_joinServerButton->OnClicked.AddDynamic(this, &UMainMenu::joinServerBtnClicked);
+	m_cancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::cancelJoinMenuBtnClicked);
 
 	return true;
 }
@@ -36,20 +40,31 @@ void UMainMenu::Setup()
 	}
 }
 
-void UMainMenu::hostBtnClicked()
+void UMainMenu::hostServerBtnClicked()
 {
 	if(m_menuInterface)
 	{
-		m_menuInterface->Host();
+		m_menuInterface->HostServer();
 	}
 }
 
-void UMainMenu::joinBtnClicked()
+void UMainMenu::joinMenuBtnClicked()
 {
-	if (m_menuInterface)
+	m_menuSwitcher->SetActiveWidget(m_joinMenu);
+}
+
+void UMainMenu::joinServerBtnClicked()
+{
+	FString ipAddress = m_ipAddressTxtBox->GetText().ToString();
+	if (m_menuInterface && !ipAddress.IsEmpty())
 	{
-		m_menuInterface->Join();
+		m_menuInterface->JoinServer(ipAddress);
 	}
+}
+
+void UMainMenu::cancelJoinMenuBtnClicked()
+{
+	m_menuSwitcher->SetActiveWidget(m_mainMenu);
 }
 
 void UMainMenu::OnLevelRemovedFromWorld(ULevel* inLevel, UWorld* inWorld)
