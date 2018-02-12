@@ -28,6 +28,9 @@ class PUZZLEPLATFORMS_API UPuzzlePlatformsGameInstance : public UGameInstance, p
 	UPROPERTY(EditAnywhere)
 	TAssetPtr<UWorld> LevelToHost;
 
+	UPROPERTY(EditAnywhere)
+	TAssetPtr<UWorld> LobbyLevel;
+
 public:
 	UPuzzlePlatformsGameInstance();
 
@@ -44,4 +47,7 @@ public:
 
 	UFUNCTION(Exec)
 	void JoinServer(const FString& address) override;
+
+	UFUNCTION(Exec)
+	void QuitServer() override;
 };

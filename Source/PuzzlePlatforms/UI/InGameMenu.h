@@ -6,6 +6,8 @@
 #include "MenuWidget.h"
 #include "InGameMenu.generated.h"
 
+class UButton;
+
 /**
  * 
  */
@@ -14,7 +16,19 @@ class PUZZLEPLATFORMS_API UInGameMenu : public UMenuWidget
 {
 	GENERATED_BODY()
 	
+	UPROPERTY(meta = (BindWidget))
+	UButton* m_quitServerButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* m_backToGameButton = nullptr;
+
 public:
 	virtual bool Initialize() override;
-	
+
+private:
+	UFUNCTION()
+	void quitServerBtnClicked();
+
+	UFUNCTION()
+	void backToGameBtnClicked();
 };

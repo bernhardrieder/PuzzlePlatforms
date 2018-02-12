@@ -68,3 +68,26 @@ void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 		firstPlayerController->ClientTravel(address, ETravelType::TRAVEL_Absolute);
 	}
 }
+
+void UPuzzlePlatformsGameInstance::QuitServer()
+{
+	if (LobbyLevel.IsNull())
+	{
+		const FString errorMessage = "there is no lobby level set!";
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
+		else
+			UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
+
+		return;
+	}
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString::Printf(TEXT("Player quits server")));
+	}
+
+	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+	{
+		firstPlayerController->ClientTravel(LobbyLevel.GetLongPackageName(), ETravelType::TRAVEL_Absolute);
+	}
+}
