@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/MainMenu.h"
 #include "UI/InGameMenu.h"
+#include "GameFramework/GameModeBase.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
@@ -71,23 +72,18 @@ void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 
 void UPuzzlePlatformsGameInstance::QuitServer()
 {
-	if (LobbyLevel.IsNull())
+	if (UWorld* world = GetWorld())
 	{
-		const FString errorMessage = "there is no lobby level set!";
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
+		if (world->IsServer())
+		{
+			world->GetAuthGameMode()->ReturnToMainMenuHost();
+		}
 		else
-			UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
-
-		return;
-	}
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString::Printf(TEXT("Player quits server")));
-	}
-
-	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
-	{
-		firstPlayerController->ClientTravel(LobbyLevel.GetLongPackageName(), ETravelType::TRAVEL_Absolute);
+		{
+			if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+			{
+				firstPlayerController->ClientReturnToMainMenu("Back to main menu");
+			}
+		}
 	}
 }
