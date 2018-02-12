@@ -3,6 +3,7 @@
 #include "PuzzlePlatformsGameInstance.h"
 #include "Engine/Engine.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/MainMenu.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
@@ -16,10 +17,12 @@ void UPuzzlePlatformsGameInstance::Init()
 
 void UPuzzlePlatformsGameInstance::LoadMenu()
 {
-	//if (!WBP_MainMenu.Class)
-	//	return;
-	UUserWidget* mainMenu = CreateWidget<UUserWidget>(this, WBP_MainMenu);
+	if (!WBP_MainMenu.GetDefaultObject())
+		return;
+	UMainMenu* mainMenu = CreateWidget<UMainMenu>(this, WBP_MainMenu);
 	mainMenu->AddToViewport();
+	mainMenu->SetMenuInterface(this);
+
 	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
 	{
 		FInputModeUIOnly inputMode;
@@ -38,7 +41,13 @@ void UPuzzlePlatformsGameInstance::Host()
 	}
 	if(UWorld* const world = GetWorld())
 	{
-		world->ServerTravel("/Game/ThirdPersonCPP/Maps/ThirdPersonExampleMap?listen");
+		world->ServerTravel("/Game/Maps/PuzzlePlatforms?listen");
+
+		if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+		{
+			firstPlayerController->SetInputMode(FInputModeGameOnly());
+			firstPlayerController->bShowMouseCursor = false;
+		}
 	}
 }
 

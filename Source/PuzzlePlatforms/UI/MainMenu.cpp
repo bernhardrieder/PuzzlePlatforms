@@ -14,12 +14,23 @@ bool UMainMenu::Initialize()
 	return true;
 }
 
+void UMainMenu::SetMenuInterface(IMenuInterface* menuInterface)
+{
+	m_menuInterface = menuInterface;
+}
+
 void UMainMenu::hostBtnClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Host btn clicked!"));
+	if(m_menuInterface)
+	{
+		m_menuInterface->Host();
+	}
 }
 
 void UMainMenu::joinBtnClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("join btn clicked!"));
+	if (m_menuInterface)
+	{
+		m_menuInterface->Join();
+	}
 }
