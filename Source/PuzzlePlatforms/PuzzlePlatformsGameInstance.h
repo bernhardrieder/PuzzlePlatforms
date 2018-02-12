@@ -9,6 +9,7 @@
 
 class UUserWidget;
 class UMainMenu;
+class UMenuWidget;
 
 /**
  * 
@@ -19,7 +20,10 @@ class PUZZLEPLATFORMS_API UPuzzlePlatformsGameInstance : public UGameInstance, p
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> WBP_MainMenu;
+	TSubclassOf<UMenuWidget> WBP_MainMenu;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMenuWidget> WBP_InGameMenu;
 
 	UPROPERTY(EditAnywhere)
 	TAssetPtr<UWorld> LevelToHost;
@@ -31,6 +35,9 @@ public:
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void LoadMenu();
+
+	UFUNCTION(Exec, BlueprintCallable)
+	void LoadInGameMenu();
 
 	UFUNCTION(Exec)
 	void HostServer() override;

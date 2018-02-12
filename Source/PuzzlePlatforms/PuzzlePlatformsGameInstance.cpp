@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/MainMenu.h"
+#include "UI/InGameMenu.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
@@ -19,9 +20,18 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 {
 	if (!WBP_MainMenu.GetDefaultObject())
 		return;
-	UMainMenu* mainMenu = CreateWidget<UMainMenu>(this, WBP_MainMenu);
-	mainMenu->SetMenuInterface(this);
-	mainMenu->Setup();
+	UMenuWidget* menu = CreateWidget<UMenuWidget>(this, WBP_MainMenu);
+	menu->SetMenuInterface(this);
+	menu->Setup();
+}
+
+void UPuzzlePlatformsGameInstance::LoadInGameMenu()
+{
+	if (!WBP_InGameMenu.GetDefaultObject())
+		return;
+	UMenuWidget* menu = CreateWidget<UMenuWidget>(this, WBP_InGameMenu);
+	menu->SetMenuInterface(this);
+	menu->Setup();
 }
 
 void UPuzzlePlatformsGameInstance::HostServer()
