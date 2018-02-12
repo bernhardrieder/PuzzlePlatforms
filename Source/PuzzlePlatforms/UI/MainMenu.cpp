@@ -7,13 +7,15 @@
 
 bool UMainMenu::Initialize()
 {
-	if (!Super::Initialize() || !m_hostServerButton || !m_joinMenuButton || !m_joinServerButton || !m_cancelJoinMenuButton)
+	if (!Super::Initialize() || !m_hostServerButton || !m_joinMenuButton || !m_joinServerButton || !m_cancelJoinMenuButton || !m_quitGameButton)
 		return false;
 
 	m_hostServerButton->OnClicked.AddDynamic(this, &UMainMenu::hostServerBtnClicked);
 	m_joinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::joinMenuBtnClicked);
 	m_joinServerButton->OnClicked.AddDynamic(this, &UMainMenu::joinServerBtnClicked);
 	m_cancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::cancelJoinMenuBtnClicked);
+	m_quitGameButton->OnClicked.AddDynamic(this, &UMainMenu::quitGameBtnClicked);
+	
 
 	return true;
 }
@@ -43,4 +45,12 @@ void UMainMenu::joinServerBtnClicked()
 void UMainMenu::cancelJoinMenuBtnClicked()
 {
 	m_menuSwitcher->SetActiveWidget(m_mainMenu);
+}
+
+void UMainMenu::quitGameBtnClicked()
+{
+	if (m_menuInterface)
+	{
+		m_menuInterface->QuitGame();
+	}
 }

@@ -24,5 +24,5 @@ public:
 	virtual void HostServer() = 0;
 	virtual void QuitServer() = 0;
 	virtual void JoinServer(const FString& ipAddress) = 0;
-	
+	virtual void QuitGame() = 0;
 };

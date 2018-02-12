@@ -31,6 +31,9 @@ class PUZZLEPLATFORMS_API UMainMenu : public UMenuWidget
 	UButton* m_cancelJoinMenuButton = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* m_quitGameButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
 	UWidgetSwitcher* m_menuSwitcher = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
@@ -57,4 +60,7 @@ private:
 
 	UFUNCTION()
 	void cancelJoinMenuBtnClicked();
+
+	UFUNCTION()
+	void quitGameBtnClicked();
 };

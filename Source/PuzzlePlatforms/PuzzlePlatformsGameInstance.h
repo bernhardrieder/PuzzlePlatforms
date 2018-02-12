@@ -47,4 +47,7 @@ public:
 
 	UFUNCTION(Exec)
 	void QuitServer() override;
+
+	UFUNCTION(Exec)
+	void QuitGame() override;
 };

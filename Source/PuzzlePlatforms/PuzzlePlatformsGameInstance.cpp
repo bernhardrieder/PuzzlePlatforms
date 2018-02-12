@@ -6,6 +6,7 @@
 #include "UI/MainMenu.h"
 #include "UI/InGameMenu.h"
 #include "GameFramework/GameModeBase.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
@@ -85,5 +86,22 @@ void UPuzzlePlatformsGameInstance::QuitServer()
 				firstPlayerController->ClientReturnToMainMenu("Back to main menu");
 			}
 		}
+	}
+}
+
+void UPuzzlePlatformsGameInstance::QuitGame()
+{
+	//in case this happens during the game
+	if (UWorld* world = GetWorld())
+	{
+		if (world->IsServer())
+		{
+			world->GetAuthGameMode()->ReturnToMainMenuHost();
+		}
+	}
+
+	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+	{
+		UKismetSystemLibrary::QuitGame(firstPlayerController, firstPlayerController, EQuitPreference::Quit);
 	}
 }
