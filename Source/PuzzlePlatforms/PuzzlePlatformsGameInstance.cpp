@@ -2,6 +2,7 @@
 
 #include "PuzzlePlatformsGameInstance.h"
 #include "Engine/Engine.h"
+#include "Blueprint/UserWidget.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
@@ -11,6 +12,22 @@ UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 void UPuzzlePlatformsGameInstance::Init()
 {
 	Super::Init();
+}
+
+void UPuzzlePlatformsGameInstance::LoadMenu()
+{
+	//if (!WBP_MainMenu.Class)
+	//	return;
+	UUserWidget* mainMenu = CreateWidget<UUserWidget>(this, WBP_MainMenu);
+	mainMenu->AddToViewport();
+	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+	{
+		FInputModeUIOnly inputMode;
+		inputMode.SetWidgetToFocus(mainMenu->TakeWidget());
+		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		firstPlayerController->SetInputMode(inputMode);
+		firstPlayerController->bShowMouseCursor = true;
+	}
 }
 
 void UPuzzlePlatformsGameInstance::Host()
@@ -32,6 +49,8 @@ void UPuzzlePlatformsGameInstance::Join(const FString& address)
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString::Printf(TEXT("Joining %s"), *address));
 	}
 
-	APlayerController* firstPlayerController = GetFirstLocalPlayerController();
-	firstPlayerController->ClientTravel(address, ETravelType::TRAVEL_Absolute);
+	if(APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+	{
+		firstPlayerController->ClientTravel(address, ETravelType::TRAVEL_Absolute);
+	}
 }
