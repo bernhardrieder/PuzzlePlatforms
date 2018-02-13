@@ -22,13 +22,14 @@ void UPuzzlePlatformsGameInstance::Init()
 	if (m_onlineSubsystem)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("found online subsystem with name %s"), *m_onlineSubsystem->GetSubsystemName().ToString());
-		IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
-		if (sessionInterface.IsValid())
+		m_sessionInterface = m_onlineSubsystem->GetSessionInterface();
+		if (m_sessionInterface.IsValid())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("session interface available"));
-			sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onCreateSessionCompleted);
-			sessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onDestroySessionCompleted);
-			sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onFindSessionsCompleted);
+			m_sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onCreateSessionCompleted);
+			m_sessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onDestroySessionCompleted);
+			m_sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onFindSessionsCompleted);
+			m_sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onJoinSessionCompleted);
 		}
 	}
 	else
@@ -68,12 +69,11 @@ void UPuzzlePlatformsGameInstance::HostServer()
 		return;
 	}
 
-	IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
-	if (sessionInterface.IsValid())
+	if (m_sessionInterface.IsValid())
 	{
-		if(sessionInterface->GetNamedSession(m_sessionName))
+		if(m_sessionInterface->GetNamedSession(m_sessionName))
 		{
-			sessionInterface->DestroySession(m_sessionName);
+			m_sessionInterface->DestroySession(m_sessionName);
 		}
 		else
 		{
@@ -132,19 +132,33 @@ void UPuzzlePlatformsGameInstance::onFindSessionsCompleted(bool success)
 
 void UPuzzlePlatformsGameInstance::createNewSession()
 {
-	IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
-	if (sessionInterface.IsValid())
+	if (m_sessionInterface.IsValid())
 	{
 		FOnlineSessionSettings sessionSettings;
 		sessionSettings.bIsLANMatch = true;
 		sessionSettings.NumPublicConnections = 2;
 		sessionSettings.bShouldAdvertise = true;
-		sessionInterface->CreateSession(0, m_sessionName, sessionSettings);
+		m_sessionInterface->CreateSession(0, m_sessionName, sessionSettings);
 	}
 }
 
-void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
+void UPuzzlePlatformsGameInstance::onJoinSessionCompleted(FName sessionName, EOnJoinSessionCompleteResult::Type bWasSuccessful)
 {
+	if (!bWasSuccessful || !m_sessionInterface.IsValid())
+		return;
+
+	FString address;
+	if(!m_sessionInterface->GetResolvedConnectString(sessionName, address))
+	{
+		const FString errorMessage = "couldn't resolve connect string!!!";
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
+		else
+			UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
+
+		return;
+	}
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString::Printf(TEXT("Joining %s"), *address));
@@ -154,6 +168,14 @@ void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 	{
 		firstPlayerController->ClientTravel(address, ETravelType::TRAVEL_Absolute);
 	}
+}
+
+void UPuzzlePlatformsGameInstance::JoinServer(int32 serverIndex)
+{
+	if (!m_sessionInterface.IsValid() || !m_sessionSearch.IsValid())
+		return;
+
+	m_sessionInterface->JoinSession(0, m_sessionName, m_sessionSearch->SearchResults[serverIndex]);
 }
 
 void UPuzzlePlatformsGameInstance::QuitServer()
@@ -193,15 +215,13 @@ void UPuzzlePlatformsGameInstance::QuitGame()
 
 void UPuzzlePlatformsGameInstance::RefreshServerList()
 {
-	IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
-	if (sessionInterface.IsValid())
+	if (m_sessionInterface.IsValid())
 	{
 		m_sessionSearch = MakeShareable<FOnlineSessionSearch>(new FOnlineSessionSearch());
 		if (m_sessionSearch.IsValid())
 		{
 			//m_sessionSearch->bIsLanQuery = true;
-			sessionInterface->FindSessions(0, m_sessionSearch.ToSharedRef());
+			m_sessionInterface->FindSessions(0, m_sessionSearch.ToSharedRef());
 		}
 	}
 }
-

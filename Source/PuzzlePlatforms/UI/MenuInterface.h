@@ -23,7 +23,7 @@ class PUZZLEPLATFORMS_API IMenuInterface
 public:
 	virtual void HostServer() = 0;
 	virtual void QuitServer() = 0;
-	virtual void JoinServer(const FString& ipAddress) = 0;
+	virtual void JoinServer(int32 serverIndex) = 0;
 	virtual void QuitGame() = 0;
 	virtual void RefreshServerList() = 0;
 };

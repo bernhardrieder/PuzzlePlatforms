@@ -76,13 +76,9 @@ void UMainMenu::joinMenuBtnClicked()
 
 void UMainMenu::joinServerBtnClicked()
 {
-	if(UServerRow* row = GetSelectedServerRow())
+	if (m_selectedServerRowIndex.IsSet() && m_menuInterface)
 	{
-		if (m_menuInterface)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("i want to join server %s"), *row->GetServerName().ToString());
-			//	m_menuInterface->JoinServer(ipAddress);
-		}
+		m_menuInterface->JoinServer(m_selectedServerRowIndex.GetValue());
 	}
 }
 
