@@ -34,7 +34,7 @@ public:
 	virtual void Init() override;
 
 	UFUNCTION(Exec, BlueprintCallable)
-	void LoadMenu();
+	void LoadMenuWidget();
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void LoadInGameMenu();

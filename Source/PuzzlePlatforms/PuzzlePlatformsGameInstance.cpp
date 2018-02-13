@@ -7,6 +7,7 @@
 #include "UI/InGameMenu.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "OnlineSubsystem.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
@@ -16,9 +17,18 @@ UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 void UPuzzlePlatformsGameInstance::Init()
 {
 	Super::Init();
+	IOnlineSubsystem* onlineSubsystem = IOnlineSubsystem::Get();
+	if(onlineSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("found online subsystem with name %s"), *onlineSubsystem->GetSubsystemName().ToString())
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("didn't found a online subsystem"))
+	}
 }
 
-void UPuzzlePlatformsGameInstance::LoadMenu()
+void UPuzzlePlatformsGameInstance::LoadMenuWidget()
 {
 	if (!WBP_MainMenu.GetDefaultObject())
 		return;
