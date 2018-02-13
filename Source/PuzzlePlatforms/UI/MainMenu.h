@@ -51,7 +51,9 @@ class PUZZLEPLATFORMS_API UMainMenu : public UMenuWidget
 
 public:
 	virtual bool Initialize() override;
-	void SetServerList(const TArray<FString> serverNames);
+	void SetServerList(const TArray<FString>& serverNames);
+	void SelectServerFromList(uint32 index);
+	UServerRow* GetSelectedServerRow() const;
 
 private:
 	UFUNCTION()
@@ -68,4 +70,6 @@ private:
 
 	UFUNCTION()
 	void quitGameBtnClicked();
+
+	TOptional<uint32> m_selectedServerRowIndex;
 };

@@ -20,22 +20,41 @@ bool UMainMenu::Initialize()
 	return true;
 }
 
-void UMainMenu::SetServerList(const TArray<FString> serverNames)
+void UMainMenu::SetServerList(const TArray<FString>& serverNames)
 {
 	if (!WBP_ServerRow.GetDefaultObject())
 		return;
 
 	m_serverListScrollBox->ClearChildren();
+	m_selectedServerRowIndex.Reset();
 
 	if (UWorld* const world = GetWorld())
 	{
-		for (const FString& serverName : serverNames)
+		for(int32 i = 0; i < serverNames.Num(); ++i)
 		{
 			UServerRow* row = CreateWidget<UServerRow>(world, WBP_ServerRow);
-			row->SetServerName(FText::FromString(serverName));
+			row->Setup(this, i);
+			row->SetServerName(FText::FromString(serverNames[i]));
 			m_serverListScrollBox->AddChild(row);
 		}
 	}
+}
+
+void UMainMenu::SelectServerFromList(uint32 index)
+{
+	m_selectedServerRowIndex = index;
+}
+
+UServerRow* UMainMenu::GetSelectedServerRow() const
+{
+	if (m_selectedServerRowIndex.IsSet())
+	{
+		if (UServerRow* row = Cast<UServerRow>(m_serverListScrollBox->GetChildAt(m_selectedServerRowIndex.GetValue())))
+		{
+			return row;
+		}
+	}
+	return nullptr;
 }
 
 void UMainMenu::hostServerBtnClicked()
@@ -57,11 +76,14 @@ void UMainMenu::joinMenuBtnClicked()
 
 void UMainMenu::joinServerBtnClicked()
 {
-	//FString ipAddress = m_ipAddressTxtBox->GetText().ToString();
-	//if (m_menuInterface && !ipAddress.IsEmpty())
-	//{
-	//	m_menuInterface->JoinServer(ipAddress);
-	//}
+	if(UServerRow* row = GetSelectedServerRow())
+	{
+		if (m_menuInterface)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("i want to join server %s"), *row->GetServerName().ToString());
+			//	m_menuInterface->JoinServer(ipAddress);
+		}
+	}
 }
 
 void UMainMenu::cancelJoinMenuBtnClicked()
