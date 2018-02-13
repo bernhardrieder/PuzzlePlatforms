@@ -7,6 +7,7 @@
 #include "UI/MenuInterface.h"
 #include "PuzzlePlatformsGameInstance.generated.h"
 
+class IOnlineSubsystem;
 class UUserWidget;
 class UMainMenu;
 class UMenuWidget;
@@ -50,4 +51,12 @@ public:
 
 	UFUNCTION(Exec)
 	void QuitGame() override;
+
+private:
+	void onCreateSessionCompleted(FName sessionName, bool success);
+	void onDestroySessionCompleted(FName sessionName, bool success);
+	void createNewSession();
+
+	IOnlineSubsystem* m_onlineSubsystem = nullptr;
+	FName m_sessionName = "MySession";
 };

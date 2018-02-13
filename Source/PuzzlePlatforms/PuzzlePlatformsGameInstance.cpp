@@ -8,19 +8,27 @@
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h"
+#include "OnlineSessionInterface.h"
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
-
 }
 
 void UPuzzlePlatformsGameInstance::Init()
 {
 	Super::Init();
-	IOnlineSubsystem* onlineSubsystem = IOnlineSubsystem::Get();
-	if(onlineSubsystem)
+	m_onlineSubsystem = IOnlineSubsystem::Get();
+	if (m_onlineSubsystem)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("found online subsystem with name %s"), *onlineSubsystem->GetSubsystemName().ToString())
+		UE_LOG(LogTemp, Warning, TEXT("found online subsystem with name %s"), *m_onlineSubsystem->GetSubsystemName().ToString());
+		IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
+		if (sessionInterface.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("session interface available"));
+			sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onCreateSessionCompleted);
+			sessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::onDestroySessionCompleted);
+		}
 	}
 	else
 	{
@@ -58,13 +66,56 @@ void UPuzzlePlatformsGameInstance::HostServer()
 
 		return;
 	}
-	if(GEngine)
+
+	IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
+	if (sessionInterface.IsValid())
 	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString("Hosting"));
+		if(sessionInterface->GetNamedSession(m_sessionName))
+		{
+			sessionInterface->DestroySession(m_sessionName);
+		}
+		else
+		{
+			createNewSession();
+		}
 	}
-	if(UWorld* const world = GetWorld())
+}
+
+void UPuzzlePlatformsGameInstance::onCreateSessionCompleted(FName sessionName, bool success)
+{
+	if(success)
 	{
-		world->ServerTravel(LevelToHost.GetLongPackageName().Append("?listen"));
+		UE_LOG(LogTemp, Warning, TEXT("session \"%s\" created"), *sessionName.ToString());
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString("Hosting"));
+		}
+		if (UWorld* const world = GetWorld())
+		{
+			world->ServerTravel(LevelToHost.GetLongPackageName().Append("?listen"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("can't create session \"%s\""), *sessionName.ToString());
+	}
+}
+
+void UPuzzlePlatformsGameInstance::onDestroySessionCompleted(FName sessionName, bool success)
+{
+	if(success)
+	{
+		createNewSession();
+	}
+}
+
+void UPuzzlePlatformsGameInstance::createNewSession()
+{
+	IOnlineSessionPtr sessionInterface = m_onlineSubsystem->GetSessionInterface();
+	if (sessionInterface.IsValid())
+	{
+		sessionInterface->CreateSession(0, m_sessionName, FOnlineSessionSettings());
 	}
 }
 
@@ -75,7 +126,7 @@ void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Green, FString::Printf(TEXT("Joining %s"), *address));
 	}
 
-	if(APlayerController* firstPlayerController = GetFirstLocalPlayerController())
+	if (APlayerController* firstPlayerController = GetFirstLocalPlayerController())
 	{
 		firstPlayerController->ClientTravel(address, ETravelType::TRAVEL_Absolute);
 	}
@@ -115,3 +166,4 @@ void UPuzzlePlatformsGameInstance::QuitGame()
 		UKismetSystemLibrary::QuitGame(firstPlayerController, firstPlayerController, EQuitPreference::Quit);
 	}
 }
+
