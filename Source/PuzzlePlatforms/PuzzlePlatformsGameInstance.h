@@ -53,12 +53,16 @@ public:
 	UFUNCTION(Exec)
 	void QuitGame() override;
 
+	UFUNCTION(Exec)
+	void RefreshServerList() override;
+
 private:
 	void onCreateSessionCompleted(FName sessionName, bool success);
 	void onDestroySessionCompleted(FName sessionName, bool success);
 	void onFindSessionsCompleted(bool success);
 	void createNewSession();
 
+	UMainMenu* m_mainMenu = nullptr;
 	IOnlineSubsystem* m_onlineSubsystem = nullptr;
 	FName m_sessionName = "MySession";
 	TSharedPtr<FOnlineSessionSearch> m_sessionSearch;

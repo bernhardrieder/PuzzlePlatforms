@@ -10,6 +10,7 @@
 class UButton;
 class UWidgetSwitcher;
 class UEditableTextBox;
+class UServerRow;
 /**
  * 
  */
@@ -43,10 +44,14 @@ class PUZZLEPLATFORMS_API UMainMenu : public UMenuWidget
 	UWidget* m_joinMenu = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UEditableTextBox* m_ipAddressTxtBox = nullptr;
+	UPanelWidget* m_serverListScrollBox = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UServerRow> WBP_ServerRow;
 
 public:
 	virtual bool Initialize() override;
+	void SetServerList(const TArray<FString> serverNames);
 
 private:
 	UFUNCTION()
