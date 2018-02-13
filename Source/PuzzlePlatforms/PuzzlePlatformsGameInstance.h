@@ -7,6 +7,7 @@
 #include "UI/MenuInterface.h"
 #include "PuzzlePlatformsGameInstance.generated.h"
 
+class FOnlineSessionSearch;
 class IOnlineSubsystem;
 class UUserWidget;
 class UMainMenu;
@@ -55,8 +56,10 @@ public:
 private:
 	void onCreateSessionCompleted(FName sessionName, bool success);
 	void onDestroySessionCompleted(FName sessionName, bool success);
+	void onFindSessionsCompleted(bool success);
 	void createNewSession();
 
 	IOnlineSubsystem* m_onlineSubsystem = nullptr;
 	FName m_sessionName = "MySession";
+	TSharedPtr<FOnlineSessionSearch> m_sessionSearch;
 };
