@@ -58,6 +58,8 @@ public:
 	UFUNCTION(Exec)
 	void RefreshServerList() override;
 
+	void StartSession();
+
 private:
 	void onCreateSessionCompleted(FName sessionName, bool success);
 	void onDestroySessionCompleted(FName sessionName, bool success);
@@ -68,7 +70,6 @@ private:
 	UMainMenu* m_mainMenu = nullptr;
 	IOnlineSubsystem* m_onlineSubsystem = nullptr;
 	IOnlineSessionPtr m_sessionInterface;
-	FName m_sessionName = "MySession";
 	TSharedPtr<FOnlineSessionSearch> m_sessionSearch;
 	FString m_serverName;
 	static FName s_serverNameKey;

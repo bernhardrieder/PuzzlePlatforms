@@ -74,9 +74,9 @@ void UPuzzlePlatformsGameInstance::HostServer(const FString& serverName)
 	if (m_sessionInterface.IsValid())
 	{
 		m_serverName = serverName;
-		if (m_sessionInterface->GetNamedSession(m_sessionName))
+		if (m_sessionInterface->GetNamedSession(NAME_GameSession))
 		{
-			m_sessionInterface->DestroySession(m_sessionName);
+			m_sessionInterface->DestroySession(NAME_GameSession);
 		}
 		else
 		{
@@ -150,11 +150,11 @@ void UPuzzlePlatformsGameInstance::createNewSession()
 	{
 		FOnlineSessionSettings sessionSettings;
 		sessionSettings.bIsLANMatch = m_onlineSubsystem->GetSubsystemName() == STEAM_SUBSYSTEM ? false : true;
-		sessionSettings.NumPublicConnections = 2;
+		sessionSettings.NumPublicConnections = 5;
 		sessionSettings.bShouldAdvertise = true;
 		sessionSettings.bUsesPresence = true;
 		sessionSettings.Set(s_serverNameKey, m_serverName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-		m_sessionInterface->CreateSession(0, m_sessionName, sessionSettings);
+		m_sessionInterface->CreateSession(0, NAME_GameSession, sessionSettings);
 	}
 }
 
@@ -191,7 +191,7 @@ void UPuzzlePlatformsGameInstance::JoinServer(int32 serverIndex)
 	if (!m_sessionInterface.IsValid() || !m_sessionSearch.IsValid())
 		return;
 
-	m_sessionInterface->JoinSession(0, m_sessionName, m_sessionSearch->SearchResults[serverIndex]);
+	m_sessionInterface->JoinSession(0, NAME_GameSession, m_sessionSearch->SearchResults[serverIndex]);
 }
 
 void UPuzzlePlatformsGameInstance::QuitServer()
@@ -242,5 +242,13 @@ void UPuzzlePlatformsGameInstance::RefreshServerList()
 			m_sessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 			m_sessionInterface->FindSessions(0, m_sessionSearch.ToSharedRef());
 		}
+	}
+}
+
+void UPuzzlePlatformsGameInstance::StartSession()
+{
+	if (m_sessionInterface.IsValid())
+	{
+		m_sessionInterface->StartSession(NAME_GameSession);
 	}
 }
