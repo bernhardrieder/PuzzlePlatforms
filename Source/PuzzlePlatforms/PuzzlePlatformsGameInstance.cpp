@@ -135,9 +135,10 @@ void UPuzzlePlatformsGameInstance::createNewSession()
 	if (m_sessionInterface.IsValid())
 	{
 		FOnlineSessionSettings sessionSettings;
-		sessionSettings.bIsLANMatch = true;
+		sessionSettings.bIsLANMatch = false;
 		sessionSettings.NumPublicConnections = 2;
 		sessionSettings.bShouldAdvertise = true;
+		sessionSettings.bUsesPresence = true;
 		m_sessionInterface->CreateSession(0, m_sessionName, sessionSettings);
 	}
 }
@@ -221,6 +222,9 @@ void UPuzzlePlatformsGameInstance::RefreshServerList()
 		if (m_sessionSearch.IsValid())
 		{
 			//m_sessionSearch->bIsLanQuery = true;
+			//use max limit of int32 because we are sharing a steam app id with all other devs who are testing their game via this dev app id! which means that we are going to find their game lobbies also!
+			m_sessionSearch->MaxSearchResults = TNumericLimits<int32>::Max();
+			m_sessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 			m_sessionInterface->FindSessions(0, m_sessionSearch.ToSharedRef());
 		}
 	}
