@@ -12,15 +12,24 @@ bool UServerRow::Initialize()
 		return false;
 
 	m_isSelectedBackground->SetVisibility(ESlateVisibility::Hidden);
-	m_selectButton->OnClicked.AddDynamic(this, &UServerRow::onSelectBtnClicked);
+	if(bIsHeader)
+	{
+		m_selectButton->SetIsEnabled(false);
+		m_selectButton->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		m_selectButton->OnClicked.AddDynamic(this, &UServerRow::onSelectBtnClicked);
+	}
 
 	return true;
 }
 
-void UServerRow::SetServerName(const FText& serverName)
+void UServerRow::SetServerData(const FServerData& serverData)
 {
-	m_serverName = serverName;
-	m_serverNameTxt->SetText(serverName);
+	m_serverNameTxt->SetText(FText::FromString(serverData.Name));
+	m_playerStatsTxt->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), serverData.ConnectedPlayers, serverData.MaxPlayers)));
+	m_hostNameTxt->SetText(FText::FromString(serverData.HostUsername));
 }
 
 void UServerRow::Setup(UMainMenu* parent, int32 rowIndex)

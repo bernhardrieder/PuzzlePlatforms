@@ -8,19 +8,28 @@
 
 bool UMainMenu::Initialize()
 {
-	if (!Super::Initialize() || !m_hostServerButton || !m_joinMenuButton || !m_joinServerButton || !m_cancelJoinMenuButton || !m_quitGameButton)
+	if (!Super::Initialize() ||!m_hostMenuButton || !m_hostServerButton || !m_joinMenuButton || !m_joinServerButton || !m_cancelJoinMenuButton || !m_quitGameButton || !m_cancelHostMenuButton || !m_hostServerButton)
 		return false;
 
-	m_hostServerButton->OnClicked.AddDynamic(this, &UMainMenu::hostServerBtnClicked);
+	//main menu 
+	m_hostMenuButton->OnClicked.AddDynamic(this, &UMainMenu::hostMenuBtnClicked);
 	m_joinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::joinMenuBtnClicked);
+	m_quitGameButton->OnClicked.AddDynamic(this, &UMainMenu::quitGameBtnClicked);
+
+	//host menu
+	m_hostServerButton->OnClicked.AddDynamic(this, &UMainMenu::hostServerBtnClicked);
+	m_hostServerButton->SetIsEnabled(false);
+	m_cancelHostMenuButton->OnClicked.AddDynamic(this, &UMainMenu::cancelHostMenuBtnClicked);
+	m_serverNameTxtBox->OnTextChanged.AddDynamic(this, &UMainMenu::onServerNameTextChanged);
+
+	//join menu
 	m_joinServerButton->OnClicked.AddDynamic(this, &UMainMenu::joinServerBtnClicked);
 	m_cancelJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::cancelJoinMenuBtnClicked);
-	m_quitGameButton->OnClicked.AddDynamic(this, &UMainMenu::quitGameBtnClicked);
 
 	return true;
 }
 
-void UMainMenu::SetServerList(const TArray<FString>& serverNames)
+void UMainMenu::SetServerList(const TArray<FServerData>& serverData)
 {
 	if (!WBP_ServerRow.GetDefaultObject())
 		return;
@@ -30,11 +39,11 @@ void UMainMenu::SetServerList(const TArray<FString>& serverNames)
 
 	if (UWorld* const world = GetWorld())
 	{
-		for(int32 i = 0; i < serverNames.Num(); ++i)
+		for(int32 i = 0; i < serverData.Num(); ++i)
 		{
 			UServerRow* row = CreateWidget<UServerRow>(world, WBP_ServerRow);
 			row->Setup(this, i);
-			row->SetServerName(FText::FromString(serverNames[i]));
+			row->SetServerData(serverData[i]);
 			m_serverListScrollBox->AddChild(row);
 		}
 	}
@@ -43,6 +52,7 @@ void UMainMenu::SetServerList(const TArray<FString>& serverNames)
 void UMainMenu::SelectServerFromList(uint32 index)
 {
 	m_selectedServerRowIndex = index;
+	m_joinServerButton->SetIsEnabled(GetSelectedServerRow() ? true : false);
 }
 
 UServerRow* UMainMenu::GetSelectedServerRow() const
@@ -57,11 +67,24 @@ UServerRow* UMainMenu::GetSelectedServerRow() const
 	return nullptr;
 }
 
+void UMainMenu::hostMenuBtnClicked()
+{
+	m_menuSwitcher->SetActiveWidget(m_hostMenu);
+	m_serverNameTxtBox->SetKeyboardFocus();
+}
+
+void UMainMenu::cancelHostMenuBtnClicked()
+{
+	m_menuSwitcher->SetActiveWidget(m_mainMenu);
+	m_serverNameTxtBox->SetText(FText::FromString(""));
+	m_hostMenuButton->SetKeyboardFocus();
+}
+
 void UMainMenu::hostServerBtnClicked()
 {
 	if (m_menuInterface)
 	{
-		m_menuInterface->HostServer();
+		m_menuInterface->HostServer(m_serverNameTxtBox->GetText().ToString());
 	}
 }
 
@@ -71,7 +94,9 @@ void UMainMenu::joinMenuBtnClicked()
 	if (m_menuInterface)
 	{
 		m_menuInterface->RefreshServerList();
+		m_joinServerButton->SetIsEnabled(false);
 	}
+	m_cancelJoinMenuButton->SetKeyboardFocus();
 }
 
 void UMainMenu::joinServerBtnClicked()
@@ -85,6 +110,7 @@ void UMainMenu::joinServerBtnClicked()
 void UMainMenu::cancelJoinMenuBtnClicked()
 {
 	m_menuSwitcher->SetActiveWidget(m_mainMenu);
+	m_joinMenuButton->SetKeyboardFocus();
 }
 
 void UMainMenu::quitGameBtnClicked()
@@ -93,4 +119,9 @@ void UMainMenu::quitGameBtnClicked()
 	{
 		m_menuInterface->QuitGame();
 	}
+}
+
+void UMainMenu::onServerNameTextChanged(const FText& text)
+{
+	m_hostServerButton->SetIsEnabled(!text.IsEmpty());
 }

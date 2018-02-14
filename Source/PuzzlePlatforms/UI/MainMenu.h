@@ -11,6 +11,18 @@ class UButton;
 class UWidgetSwitcher;
 class UEditableTextBox;
 class UServerRow;
+
+USTRUCT()
+struct FServerData
+{
+	GENERATED_BODY()
+	
+	FString Name;
+	uint32 ConnectedPlayers;
+	uint32 MaxPlayers;
+	FString HostUsername;
+};
+
 /**
  * 
  */
@@ -20,7 +32,7 @@ class PUZZLEPLATFORMS_API UMainMenu : public UMenuWidget
 	GENERATED_BODY()
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* m_hostServerButton = nullptr;
+	UButton* m_hostMenuButton = nullptr;
 	
 	UPROPERTY(meta = (BindWidget))
 	UButton* m_joinMenuButton = nullptr;
@@ -44,18 +56,36 @@ class PUZZLEPLATFORMS_API UMainMenu : public UMenuWidget
 	UWidget* m_joinMenu = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
+	UWidget* m_hostMenu = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
 	UPanelWidget* m_serverListScrollBox = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UServerRow> WBP_ServerRow;
 
+	UPROPERTY(meta =(BindWidget))
+	UEditableTextBox* m_serverNameTxtBox = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* m_cancelHostMenuButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* m_hostServerButton = nullptr;
+
 public:
 	virtual bool Initialize() override;
-	void SetServerList(const TArray<FString>& serverNames);
+	void SetServerList(const TArray<FServerData>& serverData);
 	void SelectServerFromList(uint32 index);
 	UServerRow* GetSelectedServerRow() const;
 
 private:
+	UFUNCTION()
+	void hostMenuBtnClicked();
+
+	UFUNCTION()
+	void cancelHostMenuBtnClicked();
+
 	UFUNCTION()
 	void hostServerBtnClicked();
 
@@ -70,6 +100,9 @@ private:
 
 	UFUNCTION()
 	void quitGameBtnClicked();
+
+	UFUNCTION()
+	void onServerNameTextChanged(const FText& text);
 
 	TOptional<uint32> m_selectedServerRowIndex;
 };

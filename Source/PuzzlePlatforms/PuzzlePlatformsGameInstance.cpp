@@ -11,6 +11,8 @@
 #include "OnlineSessionSettings.h"
 #include "OnlineSessionInterface.h"
 
+FName UPuzzlePlatformsGameInstance::s_serverNameKey = FName("ServerNameKey");
+
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance() : Super()
 {
 }
@@ -56,7 +58,7 @@ void UPuzzlePlatformsGameInstance::LoadInGameMenu()
 	menu->Setup();
 }
 
-void UPuzzlePlatformsGameInstance::HostServer()
+void UPuzzlePlatformsGameInstance::HostServer(const FString& serverName)
 {
 	if (LevelToHost.IsNull())
 	{
@@ -64,14 +66,15 @@ void UPuzzlePlatformsGameInstance::HostServer()
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
 		else
-			UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
+		UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
 
 		return;
 	}
 
 	if (m_sessionInterface.IsValid())
 	{
-		if(m_sessionInterface->GetNamedSession(m_sessionName))
+		m_serverName = serverName;
+		if (m_sessionInterface->GetNamedSession(m_sessionName))
 		{
 			m_sessionInterface->DestroySession(m_sessionName);
 		}
@@ -84,7 +87,7 @@ void UPuzzlePlatformsGameInstance::HostServer()
 
 void UPuzzlePlatformsGameInstance::onCreateSessionCompleted(FName sessionName, bool success)
 {
-	if(success)
+	if (success)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("session \"%s\" created"), *sessionName.ToString());
 
@@ -105,7 +108,7 @@ void UPuzzlePlatformsGameInstance::onCreateSessionCompleted(FName sessionName, b
 
 void UPuzzlePlatformsGameInstance::onDestroySessionCompleted(FName sessionName, bool success)
 {
-	if(success)
+	if (success)
 	{
 		createNewSession();
 	}
@@ -113,20 +116,31 @@ void UPuzzlePlatformsGameInstance::onDestroySessionCompleted(FName sessionName, 
 
 void UPuzzlePlatformsGameInstance::onFindSessionsCompleted(bool success)
 {
-	if(success && m_sessionSearch.IsValid() && m_mainMenu)
+	if (success && m_sessionSearch.IsValid() && m_mainMenu)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found %i sessions"), m_sessionSearch->SearchResults.Num());
 
-		TArray<FString> foundServerNames;
-		if(m_sessionSearch->SearchResults.Num() > 0 )
+		TArray<FServerData> foundServerData;
+		if (m_sessionSearch->SearchResults.Num() > 0)
 		{
 			for (auto& result : m_sessionSearch->SearchResults)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Found session: %s"), *result.GetSessionIdStr());
-				foundServerNames.Add(result.GetSessionIdStr());
+				FServerData serverData;
+				serverData.HostUsername = result.Session.OwningUserName;
+				serverData.MaxPlayers = result.Session.SessionSettings.NumPublicConnections;
+				serverData.ConnectedPlayers = serverData.MaxPlayers - result.Session.NumOpenPublicConnections;
+				FString serverName;
+				if (!result.Session.SessionSettings.Get(s_serverNameKey, serverName))
+				{
+					serverName = "undefined";
+				}
+				serverData.Name = serverName;
+				foundServerData.Add(serverData);
 			}
 		}
-		m_mainMenu->SetServerList(foundServerNames);
+
+		m_mainMenu->SetServerList(foundServerData);
 	}
 }
 
@@ -135,10 +149,11 @@ void UPuzzlePlatformsGameInstance::createNewSession()
 	if (m_sessionInterface.IsValid())
 	{
 		FOnlineSessionSettings sessionSettings;
-		sessionSettings.bIsLANMatch = false;
+		sessionSettings.bIsLANMatch = m_onlineSubsystem->GetSubsystemName() == STEAM_SUBSYSTEM ? false : true;
 		sessionSettings.NumPublicConnections = 2;
 		sessionSettings.bShouldAdvertise = true;
 		sessionSettings.bUsesPresence = true;
+		sessionSettings.Set(s_serverNameKey, m_serverName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		m_sessionInterface->CreateSession(0, m_sessionName, sessionSettings);
 	}
 }
@@ -149,13 +164,13 @@ void UPuzzlePlatformsGameInstance::onJoinSessionCompleted(FName sessionName, EOn
 		return;
 
 	FString address;
-	if(!m_sessionInterface->GetResolvedConnectString(sessionName, address))
+	if (!m_sessionInterface->GetResolvedConnectString(sessionName, address))
 	{
 		const FString errorMessage = "couldn't resolve connect string!!!";
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
 		else
-			UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
+		UE_LOG(LogTemp, Error, TEXT("%s"), *errorMessage);
 
 		return;
 	}

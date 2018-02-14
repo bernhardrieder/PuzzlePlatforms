@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ServerRow.generated.h"
 
+struct FServerData;
 class UTextBlock;
 class UMainMenu;
 class UButton;
@@ -23,20 +24,22 @@ class PUZZLEPLATFORMS_API UServerRow : public UUserWidget
 	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* m_serverNameTxt = nullptr;
-	
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* m_connectedPlayersTxt = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* m_maxPlayersTxt = nullptr;
+	UTextBlock* m_playerStatsTxt = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* m_isSelectedBackground = nullptr;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* m_hostNameTxt = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	bool bIsHeader = false;
+
 public:
 	virtual bool Initialize() override;
-	void SetServerName(const FText& serverName);
-	FORCEINLINE FText GetServerName() const { return m_serverName; }
+	void SetServerData(const FServerData& serverData);
 	void Setup(UMainMenu* parent, int32 rowIndex);
 
 private:
@@ -46,5 +49,4 @@ private:
 private:
 	UMainMenu* m_mainMenu;
 	int32 m_rowIndex;
-	FText m_serverName;
 };

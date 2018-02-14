@@ -43,7 +43,7 @@ public:
 	void LoadInGameMenu();
 
 	UFUNCTION(Exec)
-	void HostServer() override;
+	void HostServer(const FString& serverName) override;
 
 	UFUNCTION(Exec)
 	void JoinServer(int32 serverIndex) override;
@@ -69,4 +69,7 @@ private:
 	IOnlineSessionPtr m_sessionInterface;
 	FName m_sessionName = "MySession";
 	TSharedPtr<FOnlineSessionSearch> m_sessionSearch;
+	FString m_serverName;
+	static FName s_serverNameKey;
+
 };
