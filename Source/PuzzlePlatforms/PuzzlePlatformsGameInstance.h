@@ -28,8 +28,9 @@ class PUZZLEPLATFORMS_API UPuzzlePlatformsGameInstance : public UGameInstance, p
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UMenuWidget> WBP_InGameMenu;
 
+public:
 	UPROPERTY(EditAnywhere)
-	TAssetPtr<UWorld> LevelToHost;
+	TAssetPtr<UWorld> LobbyLevel;
 
 public:
 	UPuzzlePlatformsGameInstance();

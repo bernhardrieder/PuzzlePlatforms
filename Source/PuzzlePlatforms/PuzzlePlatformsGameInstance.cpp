@@ -60,9 +60,9 @@ void UPuzzlePlatformsGameInstance::LoadInGameMenu()
 
 void UPuzzlePlatformsGameInstance::HostServer(const FString& serverName)
 {
-	if (LevelToHost.IsNull())
+	if (LobbyLevel.IsNull())
 	{
-		const FString errorMessage = "there is no level to host!";
+		const FString errorMessage = "there is no lobby level!";
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, errorMessage);
 		else
@@ -97,7 +97,7 @@ void UPuzzlePlatformsGameInstance::onCreateSessionCompleted(FName sessionName, b
 		}
 		if (UWorld* const world = GetWorld())
 		{
-			world->ServerTravel(LevelToHost.GetLongPackageName().Append("?listen"));
+			world->ServerTravel(LobbyLevel.GetLongPackageName().Append("?listen"));
 		}
 	}
 	else
